@@ -1,0 +1,105 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Nov 21 03:16:07 2022
+
+@author: Dell
+"""
+'''
+Problem statement :
+    -Implementing the feedforward neural network with Keras and Tensorflow
+    a. Import the necessary packages
+    b. Load the training and testing data (MNIST/CIFAR10)
+    c. Define the network architecture using Keras.
+    d. Train the model using SGD (Stochastic Gradient Descent)
+    e. Evaluate the network
+    f. Plot the training loss and accuracy
+
+'''
+
+# a. Importing the necessary packages
+
+import tensorflow as tf
+from tensorflow import keras
+import matplotlib.pyplot as plt
+import random  # to get random values btw two numbers
+
+
+# b. Load the training and testing data (MNIST)
+mnist = tf.keras.datasets.mnist  #Import the MNIST dataset from Keras
+(x_train, y_train), (x_test, y_test) = mnist.load_data()   #splitting the data into training and testing sets
+
+x_train = x_train/255
+x_test = x_test/255
+#to make pixel values of images btw 0->1 from 0->255
+
+'''
+x_train = x_train[0]
+img_len, img_width = x_train.shape
+print("size of image: ", img_len, 'x', img_width)
+#To get size of the input image
+'''
+
+# c. Define the network architecture using Keras
+
+model = keras.Sequential([  # we use sequential model because we need a feedforward NN
+    keras.layers.Flatten(input_shape=(28,28)),  # creating the input layer. Flatten method is used to convert the input to a vector so that it can be used in input layer
+    keras.layers.Dense(128, activation="relu"), # creating hidden layer with 128 nodes and activation function as relu
+    keras.layers.Dense(10, activation="softmax") #creating output layer with 10 nodes and softmax as activation function
+])
+
+model.summary()
+
+# d. Train the model using SGD
+
+model.compile(optimizer="sgd", # we use sgd algo to optimise our NN
+              loss="sparse_categorical_crossentropy", # it gives dissimilarity btw actual values and trained values
+              metrics=['accuracy'] # it helps us to measure accuracy
+)
+
+history = model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=10)
+# we fit the model with training and vaidate it with testing data. Chancing epochs can change accuracy
+
+# e. Evaluate the network
+
+test_loss, test_acc = model.evaluate(x_test, y_test)
+print("loss=%.3f" %test_loss)
+print("Accuracy=%.3f" %test_acc)
+#here we evaluated training loss and accuracy
+
+n = random.randint(0,9999)
+plt.imshow(x_test[n]) #test with random value n
+plt.show()
+predicted_value = model.predict(x_test) # predict with random value n
+plt.imshow(x_test[n])
+plt.show()
+
+print("Predicted Value : ", predicted_value[n])
+
+# f. Plot the training loss and accuracy
+
+#Plotting the training accuracy
+plt.plot(history.history['accuracy']) #we will plot accuracy and validation accuracy
+plt.plot(history.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['Train', 'Validation'], loc='upper left')
+plt.show()
+    
+#Plotting the Training loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['Train', 'Validation'], loc='upper right')
+plt.show()
+
+        
+
+
+
+
+
+ 
+

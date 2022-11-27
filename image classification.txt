@@ -1,0 +1,75 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Nov 21 04:31:21 2022
+
+@author: Dell
+"""
+'''
+Problem Statement:
+    Build the image classification model by dividing the model in 4 staged:
+        a. Loading and preprocessing the image data
+        b. Defining the model's architecture
+        c. Training the model
+        d. Estimating model's performance
+
+'''
+
+#Importing required packages
+import tensorflow as tf
+from keras.models import Sequential
+from keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D
+import matplotlib.pyplot as plt
+import numpy as np
+
+# a. Loading and preprocessing the image data
+mnist = tf.keras.datasets.mnist
+(x_train, y_train), (x_test, y_test)= mnist.load_data() #splitting into training and testing datasets
+input_shape = (28,28,1) # 1 represents the channel. Our input is in the form of grayscale hence channel = 1
+
+#converting to float values so we can get decimal points after division
+x_train = x_train.reshape(x_train.shape[0], 28,28,1)
+x_test = x_test.reshape(x_test.shape[0],28,28,1)
+
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
+
+x_train = x_train / 255 #normalising the rgb codes
+x_test = x_test / 255
+
+print("shape of training : ", x_train.shape)
+print("shape of testing : ", x_test.shape)
+
+
+# b. Defining the model's architecture
+
+model = Sequential()   #creating a sequential model
+model.add(Conv2D(28, kernel_size=(3,3), input_shape=input_shape)) #adding convolutional network with 28 layers , and size of each convolutional layer = 3X3
+model.add(MaxPooling2D(pool_size=(2,2)))  # adding the pooling layer with size 2X2
+model.add(Flatten())  # converting to vector form to pass it to the hidden layer
+model.add(Dense(200,activation = "relu")) #hidden layer with 200 neurons
+model.add(Dropout(0.3))  # randomly remove/ disable weights of 30% neurons
+model.add(Dense(10,activation = "softmax"))
+model.summary()
+
+# c. Training the model
+
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.fit(x_train, y_train , epochs=10)
+
+# d. Estimating model's performance
+
+test_loss, test_acc = model.evaluate(x_test, y_test)
+print("Loss=%.3f" %test_loss)
+print("Accuracy=%.3f" %test_acc)
+
+#showing image present at a position[i] in dataset
+image = x_train[0]
+plt.imshow(np.squeeze(image), cmap='gray')
+plt.show()
+
+#predicting the class of image [optional]
+image = image.reshape(1, image.shape[0], image.shape[1], image.shape[2])
+predict_model = model.predict([image])
+print("Predicted class : {}".format(np.argmax(predict_model)))
+
+
